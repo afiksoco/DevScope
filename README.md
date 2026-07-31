@@ -4,8 +4,13 @@
 
 > Course project — Advanced Android Development. Built with Kotlin, Jetpack Compose, Room, Navigation Compose, OkHttp and Timber.
 
-<!-- TODO before submission: add screenshots from the demo app, e.g.
-![DevScope panel](docs/screenshot_panel.png) -->
+| Logs | Network | DB |
+|---|---|---|
+| ![Logs tab](docs/panel_logs.png) | ![Network tab](docs/panel_network.png) | ![DB tab](docs/panel_db.png) |
+
+| Nav | Crash | Demo app |
+|---|---|---|
+| ![Nav tab](docs/panel_nav.png) | ![Crash tab](docs/panel_crash.png) | ![Demo app](docs/demo_home.png) |
 
 ## Why
 
