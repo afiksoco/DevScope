@@ -34,7 +34,7 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    implementation("com.github.YOUR_GITHUB_USERNAME:DevScope:1.0.0")
+    implementation("com.github.afiksoco:DevScope:1.0.0")
 }
 ```
 

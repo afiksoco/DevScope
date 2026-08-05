@@ -61,7 +61,7 @@ dependencies {
 publishing {
     publications {
         register<MavenPublication>("release") {
-            groupId = "com.github.afik"
+            groupId = "com.github.afiksoco"
             artifactId = "devscope"
             version = "1.0.0"
             afterEvaluate {
