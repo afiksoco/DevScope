@@ -4,6 +4,8 @@
 
 > Course project — Advanced Android Development. Built with Kotlin, Jetpack Compose, Room, Navigation Compose, OkHttp and Timber.
 
+**▶ [Watch the demo video](docs/DevScope-demo.mp4)** — every tab in action, including the crash surviving process death.
+
 | Logs | Network | DB |
 |---|---|---|
 | ![Logs tab](docs/panel_logs.png) | ![Network tab](docs/panel_network.png) | ![DB tab](docs/panel_db.png) |
