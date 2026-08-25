@@ -63,7 +63,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "com.github.afiksoco"
             artifactId = "devscope"
-            version = "1.0.0"
+            version = "1.1.0"
             afterEvaluate {
                 from(components["release"])
             }
