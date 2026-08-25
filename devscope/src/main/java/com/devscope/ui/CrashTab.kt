@@ -58,6 +58,10 @@ internal fun CrashTab(module: CrashModule) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(formatTime(report.timeMs), color = DsColors.faint, fontSize = 11.sp, fontFamily = MonoFont)
                             Text("thread: ${report.threadName}", color = DsColors.muted, fontSize = 11.sp, fontFamily = MonoFont)
+                            // Uploaded through a CrashSink (Firebase in the demo).
+                            if (report.isUploaded) {
+                                Text("☁ uploaded", color = DsColors.live, fontSize = 11.sp, fontFamily = MonoFont)
+                            }
                         }
                         Text(
                             report.exceptionClass.substringAfterLast('.'),

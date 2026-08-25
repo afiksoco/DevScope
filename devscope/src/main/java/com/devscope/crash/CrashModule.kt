@@ -5,6 +5,10 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import com.devscope.core.DevScopeModule
 import com.devscope.ui.CrashTab
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -14,16 +18,44 @@ import kotlin.system.exitProcess
  */
 internal class CrashModule(context: Context) : DevScopeModule {
 
+    private companion object {
+        const val TAG = "DevScope"
+    }
+
     override val id = "crash"
     override val title = "Crash"
 
     internal val store = CrashStore(File(context.filesDir, "devscope_crashes"))
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun install() {
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         // Never wrap ourselves twice (multiple install() calls edge case).
         if (previous is DevScopeExceptionHandler) return
         Thread.setDefaultUncaughtExceptionHandler(DevScopeExceptionHandler(store, previous))
+    }
+
+    /**
+     * Sends every crash that hasn't been uploaded yet through [sink], then marks
+     * it so it is never sent twice — including across restarts.
+     *
+     * Uploading happens on the next launch rather than at crash time: the process
+     * is dying then, and a network call would not survive it.
+     */
+    fun attachSink(sink: CrashSink) {
+        scope.launch {
+            store.pending().forEach { report ->
+                // One failed upload (offline, quota) must not skip the rest or
+                // crash the app — the report simply stays pending for next time.
+                runCatching { sink.upload(report) }
+                    .onSuccess {
+                        store.markUploaded(report)
+                        Log.i(TAG, "Crash report uploaded: ${report.exceptionClass}")
+                    }
+                    .onFailure { Log.w(TAG, "Crash upload failed, will retry next launch", it) }
+            }
+        }
     }
 
     override fun onClear() = store.clear()

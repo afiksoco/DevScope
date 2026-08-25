@@ -8,4 +8,7 @@ data class CrashReport(
     val exceptionClass: String,
     val message: String,
     val stackTrace: String,
-)
+) {
+    /** True once the report was accepted by a [CrashSink] (e.g. uploaded to Firebase). */
+    val isUploaded: Boolean get() = fileName.startsWith(CrashStore.SENT_PREFIX)
+}

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.room.Room
 import com.devscope.DevScope
 import com.devscope.Trigger
+import com.devscope.demo.crash.FirestoreCrashSink
 import com.devscope.demo.data.AppDatabase
 import okhttp3.OkHttpClient
 import timber.log.Timber
@@ -28,6 +29,9 @@ class DemoApplication : Application() {
         // In a release build this whole block is a no-op inside the library.
         DevScope.install(this)
             .trackDatabase(database, name = "demo.db")
+            // Crashes recorded on this device are pushed to Firebase Firestore
+            // on the next launch, so they are visible even when the device isn't.
+            .uploadCrashesTo(FirestoreCrashSink())
             .openOn(Trigger.SHAKE)
 
         // Interceptor must be added when the client is built (OkHttp clients

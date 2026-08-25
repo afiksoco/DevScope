@@ -14,14 +14,18 @@ import java.io.File
  */
 internal class CrashStore(private val dir: File) {
 
-    private companion object {
-        const val HEADER_LINES = 4
-        const val MAX_KEPT = 20
+    companion object {
+        private const val HEADER_LINES = 4
+        private const val MAX_KEPT = 20
+
+        /** Pending reports; renamed to [SENT_PREFIX] once a CrashSink accepted them. */
+        const val PENDING_PREFIX = "crash_"
+        const val SENT_PREFIX = "sent_"
     }
 
     fun save(timeMs: Long, threadName: String, t: Throwable, stackTrace: String) {
         dir.mkdirs()
-        File(dir, "crash_$timeMs.txt").writeText(
+        File(dir, "$PENDING_PREFIX$timeMs.txt").writeText(
             listOf(
                 timeMs.toString(),
                 threadName,
@@ -35,6 +39,16 @@ internal class CrashStore(private val dir: File) {
     }
 
     fun list(): List<CrashReport> = crashFiles().mapNotNull(::parse)
+
+    /** Reports not yet accepted by a [CrashSink]. */
+    fun pending(): List<CrashReport> = list().filterNot { it.isUploaded }
+
+    /** Marks [report] as uploaded by renaming its file; survives restarts, so it is never sent twice. */
+    fun markUploaded(report: CrashReport) {
+        val from = File(dir, report.fileName)
+        val to = File(dir, report.fileName.replaceFirst(PENDING_PREFIX, SENT_PREFIX))
+        from.renameTo(to)
+    }
 
     fun delete(report: CrashReport) {
         File(dir, report.fileName).delete()
@@ -53,7 +67,7 @@ internal class CrashStore(private val dir: File) {
     }
 
     private fun crashFiles(): List<File> =
-        dir.listFiles { f -> f.name.startsWith("crash_") }
+        dir.listFiles { f -> f.name.startsWith(PENDING_PREFIX) || f.name.startsWith(SENT_PREFIX) }
             ?.sortedByDescending { it.name }
             ?: emptyList()
 

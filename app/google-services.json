@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "578532256129",
+    "project_id": "devscope-c373b",
+    "storage_bucket": "devscope-c373b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:578532256129:android:55fae500d81f7dc53b6080",
+        "android_client_info": {
+          "package_name": "com.devscope.demo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOSrmhPcQfjcv_r3UZjv3sTIA3V3rKf04"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

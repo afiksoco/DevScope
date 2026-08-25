@@ -76,7 +76,36 @@ That's it. Shake the device → the panel opens. In **release builds `install()`
 | **Network** | Every HTTP call: method, status, duration, body preview | `okhttp3.Interceptor` using `peekBody` (never consumes your response) |
 | **Nav** | Current route + navigation history with arguments | `NavController.OnDestinationChangedListener` |
 | **DB** | Browse Room tables page by page, run free SQL | `RoomDatabase.query` on a background thread |
-| **Crash** | Crashes with full stack trace; share / delete | `Thread.setDefaultUncaughtExceptionHandler`, persisted to disk |
+| **Crash** | Crashes with full stack trace; share / delete / upload | `Thread.setDefaultUncaughtExceptionHandler`, persisted to disk |
+
+## Sending crashes to the cloud (Firebase)
+
+A crash on a tester's device is useless if it stays there. DevScope defines a
+one-method contract and lets the app decide where reports go:
+
+```kotlin
+interface CrashSink {
+    fun upload(report: CrashReport)   // called off the main thread
+}
+```
+
+The demo backs it with **Firebase Firestore** (`FirestoreCrashSink`) and wires it in one line:
+
+```kotlin
+DevScope.install(this)
+    .uploadCrashesTo(FirestoreCrashSink())
+```
+
+The library itself depends on **no cloud SDK** — swapping Firestore for another
+backend means writing a different `CrashSink`, and apps that want nothing of the
+sort simply never call this.
+
+Uploads run on the *next* launch, not at crash time: the process is dying then and
+a network call would not survive it. Each report is renamed once accepted, so it is
+never sent twice — and a failed upload (offline, denied, quota) leaves it pending
+for the next attempt instead of losing it.
+
+![Uploaded crash](docs/panel_crash_uploaded.png)
 
 ## Architecture
 
@@ -110,6 +139,7 @@ interface DevScopeModule {
 | Destructive SQL in the DB tab | `DROP/DELETE/UPDATE/…` detected and requires explicit confirmation; all queries run off the main thread, paginated 50 rows |
 | App without Room/OkHttp/Navigation | Those modules are simply never registered — no forced dependencies |
 | `install()` called twice / in release | Safe no-op |
+| Crash upload fails (offline / rejected) | Report stays pending and retries next launch; never sent twice |
 
 ## Demo app
 

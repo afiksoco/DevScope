@@ -10,6 +10,7 @@ import com.devscope.core.OverlayController
 import com.devscope.core.PanelState
 import com.devscope.core.ShakeDetector
 import com.devscope.crash.CrashModule
+import com.devscope.crash.CrashSink
 import com.devscope.db.DatabaseModule
 import com.devscope.log.LogsModule
 import com.devscope.nav.NavigationModule
@@ -48,6 +49,7 @@ object DevScope {
 
     private val registry = ModuleRegistry()
     private var overlay: OverlayController? = null
+    private var crashModule: CrashModule? = null
     private var networkModule: NetworkModule? = null
     private var navModule: NavigationModule? = null
 
@@ -76,6 +78,7 @@ object DevScope {
             it.install()
         }
         CrashModule(app).also {
+            crashModule = it
             registry.register(it)
             it.install()
         }
@@ -133,6 +136,15 @@ object DevScope {
         /** Adds the DB tab for [db]. Apps without Room simply never call this. */
         fun trackDatabase(db: RoomDatabase, name: String = "room"): Installer {
             if (enabled) registry.register(DatabaseModule(db, name))
+            return this
+        }
+
+        /**
+         * Sends crash reports to [sink] on the next launch — the demo app backs
+         * this with Firebase Firestore. DevScope itself stays cloud-agnostic.
+         */
+        fun uploadCrashesTo(sink: CrashSink): Installer {
+            if (enabled) crashModule?.attachSink(sink)
             return this
         }
 
