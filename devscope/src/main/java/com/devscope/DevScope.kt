@@ -15,6 +15,7 @@ import com.devscope.db.DatabaseModule
 import com.devscope.log.LogsModule
 import com.devscope.nav.NavigationModule
 import com.devscope.network.NetworkModule
+import com.devscope.perf.PerformanceModule
 import com.devscope.ui.DevScopeRoot
 import okhttp3.Interceptor
 
@@ -74,6 +75,10 @@ object DevScope {
         isInstalled = true
 
         LogsModule(registry).also {
+            registry.register(it)
+            it.install()
+        }
+        PerformanceModule(registry).also {
             registry.register(it)
             it.install()
         }

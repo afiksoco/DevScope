@@ -10,9 +10,9 @@
 |---|---|---|
 | ![Logs tab](docs/panel_logs.png) | ![Network tab](docs/panel_network.png) | ![DB tab](docs/panel_db.png) |
 
-| Nav | Crash | Demo app |
+| Nav | Crash | Perf |
 |---|---|---|
-| ![Nav tab](docs/panel_nav.png) | ![Crash tab](docs/panel_crash.png) | ![Demo app](docs/demo_home.png) |
+| ![Nav tab](docs/panel_nav.png) | ![Crash tab](docs/panel_crash.png) | ![Perf tab](docs/panel_perf.png) |
 
 ## Why
 
@@ -74,6 +74,7 @@ That's it. Shake the device → the panel opens. In **release builds `install()`
 |---|---|---|
 | **Logs** | Live log stream with search + level filter | A capture-only `Timber.Tree` |
 | **Network** | Every HTTP call: method, status, duration, body preview | `okhttp3.Interceptor` using `peekBody` (never consumes your response) |
+| **Perf** | Live FPS, dropped frames, worst frame time, heap usage | `Choreographer.FrameCallback` frame intervals + Compose `Canvas` graph |
 | **Nav** | Current route + navigation history with arguments | `NavController.OnDestinationChangedListener` |
 | **DB** | Browse Room tables page by page, run free SQL | `RoomDatabase.query` on a background thread |
 | **Crash** | Crashes with full stack trace; share / delete / upload | `Thread.setDefaultUncaughtExceptionHandler`, persisted to disk |
@@ -124,6 +125,7 @@ interface DevScopeModule {
 - `OverlayController` attaches a `ComposeView` to the current Activity's decor view. Deliberately **not** a `WindowManager` system overlay: no `SYSTEM_ALERT_WINDOW` permission, so there is nothing the user can deny.
 - `RingBuffer` bounds every stream (2,000 log lines, 500 HTTP calls) so a long session can't OOM the host app.
 - Panel state lives at Application scope — the panel survives rotation and follows you between Activities.
+- The Perf module measures frame *intervals* from `Choreographer`; it schedules no work of its own and its graph only repaints while its tab is open.
 - OkHttp, Room and Navigation are **compileOnly** dependencies: an app that doesn't use them pays nothing and never loads those modules.
 
 ## Edge cases handled
@@ -156,7 +158,7 @@ devscope/                      the library
   ├── DevScope.kt              public API (install / triggers / interceptor)
   ├── core/                    module contract, registry+fail-safe, ring buffer,
   │                            overlay controller, shake detector
-  ├── log/  network/  nav/  db/  crash/    one package per module
+  ├── log/  network/  nav/  db/  crash/  perf/   one package per module
   └── ui/                      Compose panel, tabs, theme
 app/                           demo application
 ```
